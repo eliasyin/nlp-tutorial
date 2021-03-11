@@ -9,7 +9,7 @@ import torch.nn as nn
 # E: Symbol that shows starting of decoding output
 # P: Symbol that will fill in blank sequence if current batch data size is short than time steps
 
-def make_batch():
+def make_batch(n_step, seq_data, num_dic):
     input_batch, output_batch, target_batch = [], [], []
 
     for seq in seq_data:
@@ -64,7 +64,8 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    input_batch, output_batch, target_batch = make_batch()
+    input_batch, output_batch, target_batch = make_batch(
+        n_step, seq_data, num_dic)
 
     for epoch in range(5000):
         # make hidden shape [num_layers * num_directions, batch_size, n_hidden]
@@ -87,11 +88,11 @@ if __name__ == '__main__':
         optimizer.step()
 
     # Test
-    def translate(word, args):
-        input_batch, output_batch, _ = make_batch([[word, 'P' * len(word)]], args)
+    def translate(word):
+        input_batch, output_batch, _ = make_batch(n_step, [[word, 'P' * len(word)]], num_dic)
 
         # make hidden shape [num_layers * num_directions, batch_size, n_hidden]
-        hidden = torch.zeros(1, 1, args.n_hidden)
+        hidden = torch.zeros(1, 1, n_hidden)
         output = model(input_batch, hidden, output_batch)
         # output : [max_len+1(=6), batch_size(=1), n_class]
 
